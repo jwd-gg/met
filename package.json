@@ -1,0 +1,45 @@
+{
+	"name": "@jwd-gg/met",
+	"version": "1.0.0",
+	"module": "src/index.ts",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"dev": "bun run src/index.ts",
+		"test": "bun test",
+		"format": "npx @biomejs/biome check --write .",
+		"check": "npx @biomejs/biome check .",
+		"lint:fix": "npx @biomejs/biome check --fix --unsafe"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"files": [
+		"dist"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jwd-gg/met.git"
+	},
+	"keywords": [
+		"met",
+		"metropolitan-museum-of-art",
+		"art-api",
+		"museum-api",
+		"collection-api",
+		"jwd-gg",
+		"art-collection",
+		"museum-data"
+	],
+	"author": "jwd-gg",
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	}
+}
