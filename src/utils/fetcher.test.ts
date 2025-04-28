@@ -4,6 +4,7 @@ import type {
 	DepartmentsResponse,
 	ObjectDetails,
 	ObjectsResponse,
+	SearchOptions,
 	SearchResponse,
 } from '../types';
 import { fetcher } from './fetcher';
@@ -194,29 +195,132 @@ describe('fetcher', () => {
 	// tests for search
 	describe('search', () => {
 		const query = 'sunflowers';
-		const encodedQuery = encodeURIComponent(query);
+		const mockSearchData: SearchResponse = {
+			total: 1,
+			objectIDs: [456],
+		};
 
-		it('should fetch and return the search results', async () => {
-			const mockSearchData: SearchResponse = {
-				total: 1,
-				objectIDs: [456],
-			};
-
+		const mockApiResponse = (
+			data: SearchResponse | DepartmentsResponse | ObjectsResponse | ObjectDetails,
+		) => {
 			mockFetch.mockResolvedValueOnce(
-				new Response(JSON.stringify(mockSearchData), {
+				new Response(JSON.stringify(data), {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' },
 				}),
 			);
+		};
 
+		it('should fetch search results with only query string', async () => {
+			mockApiResponse(mockSearchData);
 			const searchResults = await fetcher.search(query);
 
 			expect(mockFetch).toHaveBeenCalledTimes(1);
-			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?q=${encodedQuery}`);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?q=sunflowers`);
 			expect(searchResults).toEqual(mockSearchData);
 		});
 
-		it('should throw an error if the API request fails', async () => {
+		it('should include boolean filter options in the request URL', async () => {
+			mockApiResponse(mockSearchData);
+			const options: SearchOptions = {
+				isHighlight: true,
+				isOnView: false,
+				hasImages: true,
+			};
+			await fetcher.search(query, options);
+
+			const expectedParams = new URLSearchParams({
+				q: query,
+				isHighlight: 'true',
+				isOnView: 'false',
+				hasImages: 'true',
+			});
+
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
+		});
+
+		it('should include departmentId filter option', async () => {
+			mockApiResponse(mockSearchData);
+			const options: SearchOptions = { departmentId: 11 }; // European Paintings
+			await fetcher.search(query, options);
+
+			const expectedParams = new URLSearchParams({
+				q: query,
+				departmentId: '11',
+			});
+
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
+		});
+
+		it('should include date range filter options', async () => {
+			mockApiResponse(mockSearchData);
+			const options: SearchOptions = { dateBegin: 1880, dateEnd: 1889 };
+			await fetcher.search(query, options);
+
+			const expectedParams = new URLSearchParams({
+				q: query,
+				dateBegin: '1880',
+				dateEnd: '1889',
+			});
+
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
+		});
+
+		it('should include single string filter options', async () => {
+			mockApiResponse(mockSearchData);
+			const options: SearchOptions = { medium: 'Paintings', geoLocation: 'France' };
+			await fetcher.search(query, options);
+
+			const expectedParams = new URLSearchParams({
+				q: query,
+				medium: 'Paintings',
+				geoLocation: 'France',
+			});
+
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
+		});
+
+		it('should include array string filter options joined by |', async () => {
+			mockApiResponse(mockSearchData);
+			const options: SearchOptions = {
+				medium: ['Paintings', 'Drawings'],
+				geoLocation: ['France', 'Netherlands'],
+			};
+			await fetcher.search(query, options);
+
+			const expectedParams = new URLSearchParams({
+				q: query,
+				medium: 'Paintings|Drawings',
+				geoLocation: 'France|Netherlands',
+			});
+
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
+		});
+
+		it('should ignore undefined or null filter options', async () => {
+			mockApiResponse(mockSearchData);
+			const options: SearchOptions = {
+				isHighlight: true,
+				departmentId: undefined,
+				medium: null as unknown as string,
+			};
+			await fetcher.search(query, options);
+
+			const expectedParams = new URLSearchParams({
+				q: query,
+				isHighlight: 'true',
+			});
+
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
+		});
+
+		it('should still throw an error if the API request fails with options', async () => {
 			const status = 400;
 			mockFetch.mockResolvedValueOnce(
 				new Response('Bad Request', {
@@ -225,9 +329,12 @@ describe('fetcher', () => {
 				}),
 			);
 
-			await expect(fetcher.search(query)).rejects.toThrow(`MET API error: ${status}`);
+			const options: SearchOptions = { isHighlight: true };
+			const expectedParams = new URLSearchParams({ q: query, isHighlight: 'true' });
+
+			await expect(fetcher.search(query, options)).rejects.toThrow(`MET API error: ${status}`);
 			expect(mockFetch).toHaveBeenCalledTimes(1);
-			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?q=${encodedQuery}`);
+			expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/search?${expectedParams.toString()}`);
 		});
 	});
 });

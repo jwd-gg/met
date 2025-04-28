@@ -10,7 +10,7 @@ A lightweight TypeScript client for the Metropolitan Museum of Art Collection AP
   - [`fetcher.getObjects()`](#fetchergetobjects)
   - [`fetcher.getObject(id)`](#fetchergetobjectid)
   - [`fetcher.getDepartments()`](#fetchergetdepartments)
-  - [`fetcher.search(query)`](#fetchersearchquery)
+  - [`fetcher.search(query, options?)`](#fetchersearchqueryoptions)
 - [Development](#development)
 - [Testing](#testing)
 - [Contributing](#contributing)
@@ -291,19 +291,51 @@ fetcher.getDepartments(): Promise<DepartmentList>
 
 ---
 
-### `fetcher.search(query)`
+### `fetcher.search(query, options?)`
 
 Performs a search across the collection based on a keyword or query string. Returns the total number of matching objects and their IDs.
 
 **Signature:**
 ```typescript
-fetcher.search(q: string): Promise<SearchResponse>
+fetcher.search(q: string, options?: SearchOptions): Promise<SearchResponse>
 ```
 
 **Parameters:**
-- `q` (string): The search query string.
+- `q` (string): The search query string (required).
+- `options` (SearchOptions, optional): An object containing filter parameters.
 
 **Returns:** `Promise<SearchResponse>`
+
+<details>
+  <summary>View <code>SearchOptions</code> Type</summary>
+
+  ```typescript
+  export interface SearchOptions {
+    /** Set to true to search only for highlighted objects. */
+    isHighlight?: boolean;
+    /** Set to true to search only against the title field. */
+    title?: boolean;
+    /** Set to true to search only against the subject keyword tags field. */
+    tags?: boolean;
+    /** Restricts search to a specific department by ID. */
+    departmentId?: number;
+    /** Set to true to search only for objects currently on view. */
+    isOnView?: boolean;
+    /** Set to true to search only against the artist name or culture field. */
+    artistOrCulture?: boolean;
+    /** Filter by medium. Accepts a single string or an array of strings (e.g., "Paintings", ["Ceramics", "Furniture"]). */
+    medium?: string | string[];
+    /** Set to true to search only for objects with images. */
+    hasImages?: boolean;
+    /** Filter by geographic location. Accepts a single string or an array of strings (e.g., "Europe", ["France", "Paris"]). */
+    geoLocation?: string | string[];
+    /** Start year for date range filter (inclusive). Requires dateEnd. */
+    dateBegin?: number;
+    /** End year for date range filter (inclusive). Requires dateBegin. */
+    dateEnd?: number;
+  }
+  ```
+</details>
 
 <details>
   <summary>View <code>SearchResponse</code> Type</summary>

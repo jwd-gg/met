@@ -3,6 +3,7 @@ import type {
 	DepartmentsResponse,
 	ObjectDetails,
 	ObjectsResponse,
+	SearchOptions,
 	SearchResponse,
 } from '../types';
 
@@ -21,5 +22,23 @@ export const fetcher = {
 		const response = await get<DepartmentsResponse>('/departments');
 		return response.departments;
 	},
-	search: (q: string) => get<SearchResponse>(`/search?q=${encodeURIComponent(q)}`),
+	search: (q: string, options?: SearchOptions) => {
+		const params = new URLSearchParams();
+		params.set('q', q);
+
+		if (options) {
+			for (const [key, value] of Object.entries(options)) {
+				if (value !== undefined && value !== null) {
+					if (Array.isArray(value)) {
+						params.set(key, value.join('|'));
+					} else {
+						params.set(key, String(value));
+					}
+				}
+			}
+		}
+
+		const path = `/search?${params.toString()}`;
+		return get<SearchResponse>(path);
+	},
 };

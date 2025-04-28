@@ -110,7 +110,21 @@ export interface Department {
 
 export type DepartmentList = Department[];
 
+export interface SearchOptions {
+	isHighlight?: boolean;
+	title?: boolean;
+	tags?: boolean;
+	departmentId?: number;
+	isOnView?: boolean;
+	artistOrCulture?: boolean;
+	medium?: string | string[];
+	hasImages?: boolean;
+	geoLocation?: string | string[];
+	dateBegin?: number;
+	dateEnd?: number;
+}
+
 export interface SearchResponse {
 	total: number;
-	objectIDs: number[];
+	objectIDs: number[] | null;
 }
