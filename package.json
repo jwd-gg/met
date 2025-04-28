@@ -1,6 +1,6 @@
 {
 	"name": "@jwd-gg/met",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"module": "src/index.ts",
 	"type": "module",
 	"main": "dist/index.js",
@@ -20,7 +20,9 @@
 	"peerDependencies": {
 		"typescript": "^5.0.0"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/jwd-gg/met.git"
