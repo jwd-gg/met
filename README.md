@@ -10,7 +10,7 @@ A lightweight TypeScript client for the Metropolitan Museum of Art Collection AP
   - [`fetcher.getObjects()`](#fetchergetobjects)
   - [`fetcher.getObject(id)`](#fetchergetobjectid)
   - [`fetcher.getDepartments()`](#fetchergetdepartments)
-  - [`fetcher.search(query, options?)`](#fetchersearchqueryoptions)
+  - [`fetcher.search(query, options?)`](#fetchersearchquery-options)
 - [Development](#development)
 - [Testing](#testing)
 - [Contributing](#contributing)
